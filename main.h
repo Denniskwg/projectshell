@@ -12,7 +12,7 @@ typedef struct path_s
 	struct path_s *next;
 } path_h;
 char *tokenizepath(char *, char, int *, char **);
-void shiftcharacter(char **, int);
+char *shiftcharacter(char **, int);
 void copystring2(char *, char *);
 void trim_end(char **);
 path_h *add_node_end(path_h **, char *);
@@ -20,7 +20,7 @@ int findpath_to_executable(path_h **);
 void copystring(char *, char **);
 void freevector(char **);
 char *getlaststring(char **);
-void get_path_string(char **);
+char *get_path_string(char **);
 void createlinkedlist(char*, path_h **);
 char *findpath(char *, path_h *head);
 char *searchpath(char *, char *);

@@ -5,61 +5,6 @@
 #include "main.h"
 
 extern char **environ;
-int findpath_to_executable(path_h **head) {
-
-	char cwd[PATH_MAX];
-	int i = 0, l = 0, k = 0, flag = 0;
-	char buffer[1000];
-	char *token, *path, *currentposition;
-
-	path_h *ptr;
-
-	if (getcwd(cwd, sizeof(cwd)) != NULL) 
-		printf("Current working dir: %s\n", cwd);
-	else
-	{
-		perror("getcwd() error");
-		return 1;
-	}
-
-	while (environ[i] != NULL)
-	{
-		if (environ[i][0] == 'P' && environ[i][1] == 'A')
-		{
-			while (environ[i][l] != '\0')
-			{
-				buffer[l] = environ[i][l];
-				l++;
-			}
-			buffer[l] = '\0';
-			path = buffer;
-			shiftcharacter(&path, 5);
-			printf("%s\n", path);
-			break;
-		}
-		i++;
-	}
-
-	currentposition = path;
-	token = tokenizepath(path, ':', &flag, &currentposition);
-	while (token != NULL)
-	{
-		flag++;
-		add_node_end(head, token);
-		free(token);
-		token = tokenizepath(path, ':', &flag, &currentposition);
-	}
-	ptr = *head;
-	while (ptr != NULL)
-	{
-		printf("NODE(%d) is %s\n", k, ptr->name);
-		k++;
-		ptr = ptr->next;
-	}
-	printf("PATH still is %s\n", path);
-	return (0);
-
-}
 char *tokenizepath(char *p, char delimiter, int *flag, char **a)
 {
 	char *token = malloc(sizeof(char) * 100);
@@ -93,19 +38,24 @@ char *tokenizepath(char *p, char delimiter, int *flag, char **a)
 		(*a)++;
 	}
 	if (*(*a) == '\0' && numberoftokens == *flag)
+	{
+		free(token);
 		return (NULL);
+	}
 	token[i] = '\0';
 	return (token);
 }
-void shiftcharacter(char **t, int n)
+char *shiftcharacter(char **t, int n)
 {
+	char *ptr = *t;
 	if (t == NULL)
-		return;
+		return (NULL);
 	while (n > 0)
 	{
-		(*t)++;
+		ptr++;
 		n--;
 	}
+	return (ptr);
 }
 void copystring2(char *s, char *s1)
 {

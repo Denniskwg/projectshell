@@ -11,7 +11,7 @@ extern char **environ;
 
 int main(void)
 {
-	char *buffer, *token, *token2, *currentposition, *file, *path;
+	char *buffer, *token, *token2, *currentposition, *file, *path, *pathptr;
 	size_t bufsize = 100;
 	ssize_t characters;
 	int i = 0, flag = 0, status;
@@ -21,8 +21,8 @@ int main(void)
 	char *real_path;
 
 	path_h *head = NULL;
-	get_path_string(&path_buffer);
-	createlinkedlist(path_buffer, &head);
+	pathptr = get_path_string(&path_buffer);
+	createlinkedlist(pathptr, &head);
 
 	while (1)
 	{
@@ -37,7 +37,7 @@ int main(void)
 	if (characters == -1)
 	{
 		free(buffer);
-		return (0);
+		return (1);
 	}
 
 
@@ -50,13 +50,15 @@ int main(void)
 		free(token);
 		file = getlaststring(&buffer);
 		av = malloc(sizeof(char *) * 2);
-		av[0] = file;
+		copystring(file, &av[0]);;
 		av[1] = NULL;
 		if (file == buffer)
 		{
 			if ((comparestrings(file, "exit") == 0))
 			{
 				free(buffer);
+				freevector(av);
+				free(av);
 				free(real_path);
 				_exit(status);
 			}
@@ -64,8 +66,10 @@ int main(void)
 			if (path == NULL)
 			{
 				printf("./hsh: 1: %s: not found\n", av[0]);
-				free(real_path);
 				free(buffer);
+				free(real_path);
+				freevector(av);
+				free(av);
 				continue;
 			}
 		}
@@ -101,6 +105,7 @@ int main(void)
 		{
 			flag++;
 			copystring(token2, &av[i]);
+			free(token2);
 			i++;
 			token2 = tokenizepath(buffer, ' ', &flag, &currentposition);
 		}
@@ -130,11 +135,11 @@ int main(void)
 			printf("Finished child process\n");
 		free(real_path);
 		free(buffer);
+		freevector(av);
+		free(av);
 	}
 	}
 	free(buffer);
-	freevector(av);
-	free(av);
 	free(path_buffer);
 	free_list(head);
 	return (0);
@@ -163,19 +168,21 @@ void copystring(char *ptr1, char **ptr2)
 		i++;
 	}
 	(*ptr2)[i] = '\0';
-	free(ptr1);
 }
 void freevector(char **av)
 {
-	while (*av != NULL)
+	int i = 0;
+
+	while (av[i] != NULL)
 	{
-		free(*av);
-		av++;
+		free(av[i]);
+		i++;
 	}
 }
-void get_path_string(char **buf)
+char *get_path_string(char **buf)
 {
 	int i = 0, l = 0;
+	char *ptr;
 
 	while (environ[i] != NULL)
 	{
@@ -187,9 +194,10 @@ void get_path_string(char **buf)
 				l++;
 			}
 			(*buf)[l] = '\0';
-			shiftcharacter(buf, 5);
+			ptr = shiftcharacter(buf, 5);
 			break;
 		}
 		i++;
 	}
+	return (ptr);
 }
